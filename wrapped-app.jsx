@@ -47,7 +47,21 @@ function decodePayload(hash) {
     let b64 = hash.replace(/^#/, "").replace(/-/g, "+").replace(/_/g, "/");
     // Re-pad
     while (b64.length % 4) b64 += "=";
-    const json = decodeURIComponent(escape(atob(b64)));
+    let json = decodeURIComponent(escape(atob(b64)));
+    // Tolerate HTML-entity escaping from email pipelines (e.g. Customer.io
+    // rendering the JSON through an HTML context before base64). Decode the
+    // handful of entities that can appear in our JSON shape.
+    if (json.indexOf("&") !== -1) {
+      json = json
+        .replace(/&quot;/g, '"')
+        .replace(/&#34;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&amp;/g, "&");
+    }
+    // Some pipelines also drop the leading `{` if the value started inside an
+    // attribute that ate it. Re-add if missing.
+    if (json[0] !== "{") json = "{" + json;
     const obj = JSON.parse(json);
     // Normalise country code: uppercase + DK → da, anything unknown → no
     const rawC = typeof obj.c === "string" ? obj.c.toLowerCase() : "";
