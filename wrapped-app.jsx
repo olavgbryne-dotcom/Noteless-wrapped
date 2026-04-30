@@ -39,6 +39,26 @@ function logMinutesInput(minutes, country) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Anonymous share-button click logging — separate Google Sheets webhook.
+// Fires every time the user taps the share button on the carousel.
+// Stores ONLY {timestamp, card, country}. No name, no notes count, no PII.
+// Fire-and-forget: never blocks the UX, never surfaces errors to the user.
+// ─────────────────────────────────────────────────────────────
+const SHARE_LOG_URL = "https://script.google.com/macros/s/AKfycbxB28jE5mqEe81BLMeNlhzokdfgEncHFQOLqmdyONFOyeVC55J9fulDAAdh_SR2KvTDyg/exec";
+
+function logShareClick(card, country) {
+  try {
+    fetch(SHARE_LOG_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ card, country }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch (_) { /* swallow */ }
+}
+
+// ─────────────────────────────────────────────────────────────
 // Hash decoder. Base64url → JSON. Returns null if invalid.
 // ─────────────────────────────────────────────────────────────
 function decodePayload(hash) {
@@ -540,6 +560,8 @@ const ShareEngine = React.forwardRef(function ShareEngine({ data, locale, ui }, 
   React.useImperativeHandle(ref, () => ({
     async share(idx) {
       const cardKey = cardKeys[idx ?? 0];
+      // Fire-and-forget analytics. Doesn't block the share gesture.
+      try { logShareClick(cardKey, data && data.country); } catch (_) {}
       try {
         const { blob, dataUrl } = await ensurePng(idx ?? 0);
         const filename = `noteless-wrapped-${data.firstName}-${cardKey}.png`;
