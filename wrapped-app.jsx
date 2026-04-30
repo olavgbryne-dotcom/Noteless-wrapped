@@ -435,49 +435,50 @@ function Carousel({ data, locale, ui, onComplete, onShare }) {
 // formatted with the locale-aware separator.
 function buildShareCaption({ locale, cardKey, data }) {
   const fmt = window.formatNumber || ((n) => String(n));
-  const tag = {
-    no: "#FåKveldeneTilbake",
-    da: "#FåAftenerneTilbage",
-  }[locale] || "#FåKveldeneTilbake";
-  const brand = "#NotelessWrapped";
+  const tag = locale === "da" ? "#AftenerneTilbage" : "#KveldeneTilbake";
   const period = locale === "da" ? "1. maj 2026" : "1. mai 2026";
+  const titleNo = "Mitt år med Noteless";
+  const titleDa = "Mit år med Noteless";
 
   if (locale === "da") {
     if (cardKey === "notes")
-      return `${fmt(data.notes, locale)} noter på et år. Tak til alle, der bærer journalen.\n\n${tag} ${brand} · ${period}`;
+      return `${titleDa}\n${fmt(data.notes, locale)} noter på et år. Tak til alle, der bærer journalen.\n\n${tag} · ${period}`;
     if (cardKey === "hours")
-      return `${fmt(data.hours, locale)} timer tilbage til pasienterne — og til mig selv.\n\n${tag} ${brand} · ${period}`;
+      return `${titleDa}\n${fmt(data.hours, locale)} timer tilbage til pasienterne — og til mig selv.\n\n${tag} · ${period}`;
     if (cardKey === "summary")
-      return `${fmt(data.notes, locale)} noter. ${fmt(data.hours, locale)} timer tilbage. Et år med mere tid.\n\n${tag} ${brand} · ${period}`;
+      return `${titleDa}\n${fmt(data.notes, locale)} noter. ${fmt(data.hours, locale)} timer tilbage. Et år med mere tid.\n\n${tag} · ${period}`;
     // cover
-    return `Min Noteless Wrapped · 1. maj.\n\n${tag} ${brand}`;
+    return `${titleDa} · 1. maj.\n\n${tag}`;
   }
 
   // Norwegian (default)
   if (cardKey === "notes")
-    return `${fmt(data.notes, locale)} notater på ett år. Takk til alle som bærer journalen.\n\n${tag} ${brand} · ${period}`;
+    return `${titleNo}\n${fmt(data.notes, locale)} notater på ett år. Takk til alle som bærer journalen.\n\n${tag} · ${period}`;
   if (cardKey === "hours")
-    return `${fmt(data.hours, locale)} timer tilbake til pasientene — og til meg selv.\n\n${tag} ${brand} · ${period}`;
+    return `${titleNo}\n${fmt(data.hours, locale)} timer tilbake til pasientene — og til meg selv.\n\n${tag} · ${period}`;
   if (cardKey === "summary")
-    return `${fmt(data.notes, locale)} notater. ${fmt(data.hours, locale)} timer tilbake. Et år med mer tid.\n\n${tag} ${brand} · ${period}`;
+    return `${titleNo}\n${fmt(data.notes, locale)} notater. ${fmt(data.hours, locale)} timer tilbake. Et år med mer tid.\n\n${tag} · ${period}`;
   // cover
-  return `Min Noteless Wrapped · 1. mai.\n\n${tag} ${brand}`;
+  return `${titleNo} · 1. mai.\n\n${tag}`;
 }
 
-function ShareModal({ open, cardIdx, data, locale, ui, onClose }) {
+// ShareEngine — headless. Always mounted while the carousel is visible so
+// the off-screen 1080×1080 render targets exist before the user taps Del.
+// We expose imperative .share(idx) via React.forwardRef + useImperativeHandle
+// so the Carousel's Del button can fire navigator.share() inside the same
+// user-gesture chain (iOS Safari requires this).
+const ShareEngine = React.forwardRef(function ShareEngine({ data, locale, ui }, ref) {
   const [toast, setToast] = React.useState(null);
-  const [busy, setBusy] = React.useState(false);
-  const offscreenRef = React.useRef(null);
+  const offscreenRefs = React.useRef([null, null, null, null]);
   const pngCacheRef = React.useRef({}); // { [cardIdx]: { blob, dataUrl } }
   const t = ui;
   const cardKeys = ["cover", "notes", "hours", "summary"];
-  const cardKey = cardKeys[cardIdx ?? 0];
 
   const cards = React.useMemo(() => (
-    open ? window.MayDaySet({
+    window.MayDaySet({
       data, copy: window.COPY_DATA[locale], formatNumber: window.formatNumber, locale,
-    }) : []
-  ), [open, locale, data]);
+    })
+  ), [locale, data]);
 
   // Reset cache when locale or data identity changes
   React.useEffect(() => { pngCacheRef.current = {}; }, [locale, data.firstName, data.notes, data.hours, data.specialty]);
@@ -487,14 +488,16 @@ function ShareModal({ open, cardIdx, data, locale, ui, onClose }) {
     setTimeout(() => setToast(null), 1600);
   };
 
-  const ensurePng = async () => {
-    const idx = cardIdx ?? 0;
+  // Render a card to PNG. Cached so subsequent shares of the same card are
+  // instant. Called inside the user-gesture chain from the Carousel's Del
+  // button \u2014 the await is short enough that iOS Safari accepts the
+  // subsequent navigator.share() call as a continuation of the gesture.
+  const ensurePng = async (idx) => {
     if (pngCacheRef.current[idx]) return pngCacheRef.current[idx];
-    if (!offscreenRef.current || !window.htmlToImage) {
+    const node = offscreenRefs.current[idx];
+    if (!node || !window.htmlToImage) {
       throw new Error("html-to-image not loaded");
     }
-    const node = offscreenRef.current;
-    // Generate at 1:1 scale (the inner div is already 1080×1080)
     const dataUrl = await window.htmlToImage.toPng(node, {
       width: 1080, height: 1080, pixelRatio: 1,
       cacheBust: true,
@@ -507,134 +510,72 @@ function ShareModal({ open, cardIdx, data, locale, ui, onClose }) {
     return cached;
   };
 
-  const handleShare = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const { blob, dataUrl } = await ensurePng();
-      const filename = `noteless-wrapped-${data.firstName}-${cardKey}.png`;
-      const file = new File([blob], filename, { type: "image/png" });
+  // Imperative API exposed to the Carousel via ref. The Carousel calls
+  // engineRef.current.share(idx) inside the Del button's onClick \u2014 we
+  // generate (or read from cache) the PNG and call navigator.share().
+  React.useImperativeHandle(ref, () => ({
+    async share(idx) {
+      const cardKey = cardKeys[idx ?? 0];
+      try {
+        const { blob, dataUrl } = await ensurePng(idx ?? 0);
+        const filename = `noteless-wrapped-${data.firstName}-${cardKey}.png`;
+        const file = new File([blob], filename, { type: "image/png" });
 
-      // Web Share API with files (mobile Safari/Chrome) — opens native share sheet
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        const caption = buildShareCaption({ locale, cardKey, data });
-        await navigator.share({
-          files: [file],
-          title: "Noteless Wrapped",
-          text: caption,
-        });
-      } else {
-        // Desktop fallback — download
-        const a = document.createElement("a");
-        a.href = dataUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        showToast(t.shareDownloaded);
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          const caption = buildShareCaption({ locale, cardKey, data });
+          await navigator.share({
+            files: [file],
+            title: caption.split("\n")[0],
+            text: caption,
+          });
+        } else {
+          // Desktop fallback \u2014 download the PNG and copy caption to clipboard.
+          const a = document.createElement("a");
+          a.href = dataUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          try {
+            await navigator.clipboard.writeText(buildShareCaption({ locale, cardKey, data }));
+          } catch {}
+          showToast(t.shareDownloaded);
+        }
+      } catch (err) {
+        if (err && err.name !== "AbortError") {
+          console.warn("share failed", err);
+          showToast(t.shareError);
+        }
       }
-    } catch (err) {
-      // User-cancelled share is silent; only surface real failures
-      if (err && err.name !== "AbortError") {
-        console.warn("share failed", err);
-        showToast(t.shareError);
-      }
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleFacebook = () => {
-    // FB sharer scrapes og:image from the URL it's given. In production this
-    // will be wrapped.noteless.no/?... — same URL the user is on.
-    const url = window.location.href.split("#")[0];
-    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-    window.open(fbUrl, "_blank", "noopener,noreferrer,width=600,height=600");
-  };
-
-  if (!open) return null;
+    },
+  }), [locale, data, ui]);
 
   return (
     <>
-      {/* Off-screen render target — full 1080×1080, used by html-to-image */}
+      {/* Off-screen render targets \u2014 one per card, full 1080\u00d71080. Always\n          mounted so the DOM is ready the instant the user taps Del. */}
       <div style={{
-        position: "fixed", left: -99999, top: 0, width: 1080, height: 1080,
+        position: "fixed", left: -99999, top: 0, width: 1080, height: 1080 * 4,
         pointerEvents: "none", opacity: 0,
       }} aria-hidden="true">
-        <div ref={offscreenRef} style={{ width: 1080, height: 1080 }}>
-          {cards[cardIdx ?? 0]}
-        </div>
+        {cards.map((card, i) => (
+          <div key={i} ref={(el) => (offscreenRefs.current[i] = el)} style={{ width: 1080, height: 1080 }}>
+            {card}
+          </div>
+        ))}
       </div>
 
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 100,
-        background: "rgba(30,28,25,0.55)",
-        display: "flex", alignItems: "flex-end", justifyContent: "center",
-      }} onClick={onClose}>
-        <div onClick={(e) => e.stopPropagation()} style={{
-          width: "100%", background: MD.paper, borderRadius: "20px 20px 0 0",
-          padding: "12px 18px 28px",
-          fontFamily: '"Untitled Sans", -apple-system, system-ui',
-          animation: "sheetUp 250ms ease-out",
-        }}>
-          {/* Grabber */}
-          <div style={{ width: 36, height: 4, background: MD.mute, borderRadius: 2, margin: "0 auto 18px" }} />
-
-          {/* Card preview \u2014 the focal element, centered & larger */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
-            <div style={{ width: 200, height: 200, position: "relative", overflow: "hidden", border: `0.5px solid ${MD.mute}`, boxShadow: "0 4px 14px rgba(0,0,0,0.10)" }}>
-              <div style={{
-                width: 1080, height: 1080,
-                transform: `scale(${200 / 1080})`,
-                transformOrigin: "top left",
-                position: "absolute", top: 0, left: 0,
-              }}>{cards[cardIdx ?? 0]}</div>
-            </div>
-          </div>
-          <div style={{ textAlign: "center", fontSize: 11, color: MD.red, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
-            {t.shareTitle}
-          </div>
-          <div style={{ textAlign: "center", fontSize: 13, color: MD.graphite, marginBottom: 18 }}>
-            {t.cardLabels[cardKey]} \u2014 {t.shareSub}
-          </div>
-
-          {/* Share buttons — 2 only */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <button onClick={handleShare} disabled={busy} style={{
-              ...shareBtnStyle(MD.red, MD.paper),
-              opacity: busy ? 0.7 : 1, cursor: busy ? "default" : "pointer",
-            }}>
-              <ShareIcon kind="share" /> {busy ? t.sharePreparing : t.shareNative}
-            </button>
-            <button onClick={handleFacebook} style={shareBtnStyle("#1877F2", MD.paper)}>
-              <ShareIcon kind="fb" /> {t.shareFB}
-            </button>
-          </div>
-
-          <div style={{
-            marginTop: 12, fontSize: 11, color: MD.graphite, lineHeight: 1.45, textAlign: "center",
-          }}>{t.shareNativeSub}</div>
-
-          <button onClick={onClose} style={{
-            width: "100%", padding: "14px", marginTop: 10,
-            background: "transparent", border: "none",
-            color: MD.graphite, fontSize: 14, fontFamily: "inherit", cursor: "pointer",
-          }}>{t.shareDone}</button>
-        </div>
-
-        {toast && (
-          <div style={{
-            position: "absolute", bottom: 100, left: "50%", transform: "translateX(-50%)",
-            background: MD.ink, color: MD.paper, padding: "10px 18px",
-            borderRadius: 99, fontSize: 13, fontFamily: '"Untitled Sans", system-ui',
-            boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-            animation: "toastIn 200ms ease-out",
-          }}>{toast}</div>
-        )}
-      </div>
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: 120, left: "50%", transform: "translateX(-50%)",
+          background: MD.ink, color: MD.paper, padding: "10px 18px",
+          borderRadius: 99, fontSize: 13, fontFamily: '"Untitled Sans", system-ui',
+          boxShadow: "0 6px 18px rgba(0,0,0,0.25)", zIndex: 200,
+          animation: "toastIn 200ms ease-out",
+        }}>{toast}</div>
+      )}
     </>
   );
-}
+});
 
 const shareBtnStyle = (bg, fg, outline) => ({
   display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
@@ -710,7 +651,9 @@ function WrappedApp() {
   // Hooks must run unconditionally — declare state regardless of payload
   const [screen, setScreen] = React.useState("prompt");
   const [minutesPerNote, setMinutesPerNote] = React.useState(3);
-  const [shareCard, setShareCard] = React.useState(null);
+  // Imperative ref to the always-mounted ShareEngine so the carousel's Del
+  // button can call .share(idx) inside the user-gesture chain.
+  const shareEngineRef = React.useRef(null);
 
   if (!payload) return <BrokenLinkScreen ui={ui} />;
 
@@ -737,13 +680,11 @@ function WrappedApp() {
       {screen === "carousel" && (
         <Carousel data={data} locale={locale} ui={ui}
           onComplete={() => {}}
-          onShare={(idx) => setShareCard(idx)} />
+          onShare={(idx) => shareEngineRef.current && shareEngineRef.current.share(idx)} />
       )}
-      <ShareModal
-        open={shareCard != null}
-        cardIdx={shareCard}
-        data={data} locale={locale} ui={ui}
-        onClose={() => setShareCard(null)} />
+      {screen === "carousel" && (
+        <ShareEngine ref={shareEngineRef} data={data} locale={locale} ui={ui} />
+      )}
     </>
   );
 }
