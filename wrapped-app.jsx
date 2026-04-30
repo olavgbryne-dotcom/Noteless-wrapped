@@ -525,7 +525,6 @@ const ShareEngine = React.forwardRef(function ShareEngine({ data, locale, ui }, 
           const caption = buildShareCaption({ locale, cardKey, data });
           await navigator.share({
             files: [file],
-            title: caption.split("\n")[0],
             text: caption,
           });
         } else {
