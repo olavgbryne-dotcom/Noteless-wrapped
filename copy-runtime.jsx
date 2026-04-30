@@ -342,7 +342,7 @@ const MAYDAY_COPY = {
   da: {
     occasion: "1. maj · Arbejdernes kampdag",
     coverEyebrow: "En lille hilsen fra Noteless-teamet",
-    coverHeadline: (n) => `${n}, dette er resultatet af vores samarbejd.`,
+    coverHeadline: (n) => `${n}, dette er resultatet af vores samarbejde.`,
     tribute: "Til timerne efter timerne,\nopkaldet klokken ni,\nnotatet klokken ti —\ntak.",
     consultsLabel: "Konsultationer vi har lavet sammen",
     hoursLabel: "Tid frigjort til at være kliniker",
