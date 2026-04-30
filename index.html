@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Noteless · Wrapped</title>
+
+  <!-- Prevent crawlers from indexing personal Wrapped pages -->
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="referrer" content="no-referrer" />
+
+  <!-- Open Graph / link preview (FB, iMessage, Slack, WhatsApp, etc.)
+       og:image is an EVERYONE'S-LANDING-PAGE preview, not personal —
+       FB's crawler never sees the URL fragment, so this is safe. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Noteless · Wrapped" />
+  <meta property="og:description" content="Et tilbakeblikk på året som gikk, sammen." />
+  <meta property="og:image" content="https://wrapped.noteless.no/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/wordmark-dark.svg" />
+
+  <style>
+    :root {
+      --md-ink: #1E1C19;
+      --md-paper: #FFFFFF;
+      --md-parchment: #F6F6F3;
+      --md-red: #C2342B;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--md-parchment);
+      color: var(--md-ink);
+      font-family: "Untitled Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overscroll-behavior: none;
+    }
+    body { min-height: 100vh; min-height: 100dvh; }
+    #root { min-height: 100vh; min-height: 100dvh; }
+
+    /* Disable iOS pull-to-refresh + tap highlight */
+    html, body { touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+
+    /* Initial loader — shown until React mounts */
+    .boot {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px;
+      background: var(--md-parchment);
+      transition: opacity 250ms ease-out;
+    }
+    .boot.fade { opacity: 0; pointer-events: none; }
+    .boot-dot {
+      width: 8px; height: 8px; border-radius: 99px;
+      background: var(--md-red);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .boot-label {
+      font-size: 11px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #818076;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Animations used in the app */
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 8px); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* Number input — strip spinners */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
+    input[type="number"] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <div class="boot" id="boot">
+    <div class="boot-dot"></div>
+    <div class="boot-label">Noteless · Wrapped</div>
+  </div>
+
+  <!-- React + Babel (pinned with integrity) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- html-to-image for share PNG export -->
+  <script src="https://unpkg.com/html-to-image@1.11.13/dist/html-to-image.js"></script>
+
+  <!-- App scripts (order matters: copy → variant → app) -->
+  <script type="text/babel" src="copy-runtime.jsx"></script>
+  <script type="text/babel" src="variant-mayday.jsx"></script>
+  <script type="text/babel" src="wrapped-app.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    // Mount once Babel has compiled the source scripts above.
+    // Babel-standalone runs them sequentially before this inline block.
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<WrappedApp />);
+    // (boot loader is removed by WrappedApp's mount effect)
+  </script>
+</body>
+</html>
