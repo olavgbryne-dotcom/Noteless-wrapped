@@ -444,9 +444,9 @@ function buildShareCaption({ locale, cardKey, data }) {
     if (cardKey === "notes")
       return `${titleDa}\n${fmt(data.notes, locale)} noter på et år. Tak til alle, der bærer journalen.\n\n${tag} · ${period}`;
     if (cardKey === "hours")
-      return `${titleDa}\n${fmt(data.hours, locale)} timer tilbage til pasienterne — og til mig selv.\n\n${tag} · ${period}`;
+      return `${titleDa}\n${fmt(data.hours, locale)} timer frigjort til pasienterne — og til mig selv.\n\n${tag} · ${period}`;
     if (cardKey === "summary")
-      return `${titleDa}\n${fmt(data.notes, locale)} noter. ${fmt(data.hours, locale)} timer tilbage. Et år med mere tid.\n\n${tag} · ${period}`;
+      return `${titleDa}\n${fmt(data.notes, locale)} noter. ${fmt(data.hours, locale)} timer frigjort. Et år med mere overskud.\n\n${tag} · ${period}`;
     // cover
     return `${titleDa} · 1. maj.\n\n${tag}`;
   }
@@ -455,9 +455,9 @@ function buildShareCaption({ locale, cardKey, data }) {
   if (cardKey === "notes")
     return `${titleNo}\n${fmt(data.notes, locale)} notater på ett år. Takk til alle som bærer journalen.\n\n${tag} · ${period}`;
   if (cardKey === "hours")
-    return `${titleNo}\n${fmt(data.hours, locale)} timer tilbake til pasientene — og til meg selv.\n\n${tag} · ${period}`;
+    return `${titleNo}\n${fmt(data.hours, locale)} timer frigjort til pasientene — og til meg selv.\n\n${tag} · ${period}`;
   if (cardKey === "summary")
-    return `${titleNo}\n${fmt(data.notes, locale)} notater. ${fmt(data.hours, locale)} timer tilbake. Et år med mer tid.\n\n${tag} · ${period}`;
+    return `${titleNo}\n${fmt(data.notes, locale)} notater. ${fmt(data.hours, locale)} timer frigjort. Et år med mer overskudd.\n\n${tag} · ${period}`;
   // cover
   return `${titleNo} · 1. mai.\n\n${tag}`;
 }
