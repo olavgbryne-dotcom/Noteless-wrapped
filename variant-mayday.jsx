@@ -55,11 +55,11 @@ function MChrome({ period, copy, mayday, dark = false }) {
       position: "absolute", left: 56, right: 56, top: 56,
       display: "flex", justifyContent: "space-between", alignItems: "flex-start", color: c,
     }}>
-      <img src={wm} width={189} height={23.251} alt="Noteless" />
-      <div style={{ textAlign: "right", display: "flex", alignItems: "flex-start", gap: 12 }}>
-        <Carnation size={22} color={dark ? "#FF6A60" : MD.red} />
+      <img src={wm} width={320} height={39.39} alt="Noteless" />
+      <div style={{ textAlign: "right", display: "flex", alignItems: "flex-start", gap: 18 }}>
+        <Carnation size={40} color={dark ? "#FF6A60" : MD.red} />
         <div style={{
-          fontSize: 14, lineHeight: 1.35, letterSpacing: "0.04em",
+          fontSize: 28, lineHeight: 1.3, letterSpacing: "0.04em",
           textTransform: "uppercase", color: c,
         }}>
           {mayday.occasion}<br/>
@@ -78,10 +78,10 @@ function MFoot({ copy, dark = false }) {
       position: "absolute", left: 56, right: 56, bottom: 56,
       display: "flex", justifyContent: "space-between", alignItems: "flex-end", color: c,
     }}>
-      <div style={{ fontSize: 14, letterSpacing: "0.04em", textTransform: "uppercase", color: muted }}>
+      <div style={{ fontSize: 28, letterSpacing: "0.04em", textTransform: "uppercase", color: muted }}>
         {copy.signoffSub}
       </div>
-      <div style={{ fontSize: 14, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+      <div style={{ fontSize: 28, letterSpacing: "0.04em", textTransform: "uppercase" }}>
         noteless.com
       </div>
     </div>
@@ -108,7 +108,7 @@ function MCover({ firstName, period, copy, mayday }) {
     <div style={mBase} data-card="cover">
       <MChrome period={period} copy={copy} mayday={mayday} />
       <div style={{ position: "absolute", left: 56, right: 56, top: MSAFE_TOP, bottom: 257 }}>
-        <div style={{ fontSize: 14, letterSpacing: "0.04em", textTransform: "uppercase", color: MD.red }}>
+        <div style={{ fontSize: 28, letterSpacing: "0.04em", textTransform: "uppercase", color: MD.red }}>
           {mayday.coverEyebrow}
         </div>
         <div style={{
@@ -120,7 +120,7 @@ function MCover({ firstName, period, copy, mayday }) {
       </div>
       {/* Red ribbon stripe along the bottom edge — workers' banner motif */}
       <div style={{
-        position: "absolute", left: 0, right: 0, bottom: 0, height: 28, background: MD.red,
+        position: "absolute", left: 0, right: 0, bottom: 0, height: 48, background: MD.red,
       }} />
       <MFoot copy={copy} />
     </div>
@@ -137,7 +137,7 @@ function MHours({ value, period, copy, mayday, formatNumber, locale, consults })
     <div style={mBase} data-card="hours">
       <MChrome period={period} copy={copy} mayday={mayday} />
       <div style={{ position: "absolute", left: 56, right: 56, top: MSAFE_TOP, bottom: 257 }}>
-        <div style={{ fontSize: 30, lineHeight: 1.15, color: MD.ink, maxWidth: 760 }}>
+        <div style={{ fontSize: 38, lineHeight: 1.12, color: MD.ink, maxWidth: 820, letterSpacing: "-0.01em" }}>
           {mayday.hoursLabel}
         </div>
         <div style={{
@@ -156,7 +156,7 @@ function MHours({ value, period, copy, mayday, formatNumber, locale, consults })
           </span>
         </div>
       </div>
-      <div style={{ position: "absolute", left: 56, right: 56, bottom: 130, fontSize: 18, color: MD.graphite, maxWidth: 720 }}>
+      <div style={{ position: "absolute", left: 56, right: 56, bottom: 130, fontSize: 36, lineHeight: 1.2, color: MD.graphite, maxWidth: 820, letterSpacing: "-0.005em" }}>
         {mayday.hoursContext}
       </div>
       <MFoot copy={copy} />
@@ -173,7 +173,7 @@ function MConsults({ value, period, copy, mayday, formatNumber, locale }) {
     <div style={mBase} data-card="notes">
       <MChrome period={period} copy={copy} mayday={mayday} />
       <div style={{ position: "absolute", left: 56, right: 56, top: MSAFE_TOP, bottom: 257 }}>
-        <div style={{ fontSize: 30, lineHeight: 1.15, color: MD.ink, maxWidth: 820 }}>
+        <div style={{ fontSize: 38, lineHeight: 1.12, color: MD.ink, maxWidth: 880, letterSpacing: "-0.01em" }}>
           {mayday.notesLabel}
         </div>
         <div style={{
@@ -184,7 +184,7 @@ function MConsults({ value, period, copy, mayday, formatNumber, locale }) {
           {formatted}
         </div>
       </div>
-      <div style={{ position: "absolute", left: 56, right: 56, bottom: 130, fontSize: 18, color: MD.graphite, maxWidth: 740 }}>
+      <div style={{ position: "absolute", left: 56, right: 56, bottom: 130, fontSize: 36, lineHeight: 1.2, color: MD.graphite, maxWidth: 820, letterSpacing: "-0.005em" }}>
         {mayday.notesContext}
       </div>
       <MFoot copy={copy} />
@@ -208,11 +208,11 @@ function MSummary({ data, period, copy, mayday, formatNumber, locale }) {
     <div style={mBase} data-card="summary">
       {/* Top red ribbon — echoes the cover, ties the set together */}
       <div style={{
-        position: "absolute", left: 0, right: 0, top: 0, height: 6, background: MD.red,
+        position: "absolute", left: 0, right: 0, top: 0, height: 12, background: MD.red,
       }} />
       <MChrome period={period} copy={copy} mayday={mayday} />
       <div style={{ position: "absolute", left: 56, right: 56, top: MSAFE_TOP, bottom: 257 }}>
-        <div style={{ fontSize: 14, letterSpacing: "0.04em", textTransform: "uppercase", color: MD.red }}>
+        <div style={{ fontSize: 28, letterSpacing: "0.04em", textTransform: "uppercase", color: MD.red }}>
           {mayday.summaryEyebrow}
         </div>
         <div style={{
@@ -226,7 +226,7 @@ function MSummary({ data, period, copy, mayday, formatNumber, locale }) {
         <div style={{ marginTop: 80 }}>
           {/* Notes */}
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingBottom: 28 }}>
-            <div style={{ fontSize: 18, color: MD.graphite, letterSpacing: "0.06em", textTransform: "uppercase", maxWidth: 320 }}>
+            <div style={{ fontSize: 36, color: MD.graphite, letterSpacing: "0.04em", textTransform: "uppercase", maxWidth: 460 }}>
               {mayday.summaryNotesLabel}
             </div>
             <div style={{
@@ -241,7 +241,7 @@ function MSummary({ data, period, copy, mayday, formatNumber, locale }) {
           <div style={{ height: 1, background: MD.mute }} />
           {/* Hours */}
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingTop: 28 }}>
-            <div style={{ fontSize: 18, color: MD.graphite, letterSpacing: "0.06em", textTransform: "uppercase", maxWidth: 320 }}>
+            <div style={{ fontSize: 36, color: MD.graphite, letterSpacing: "0.04em", textTransform: "uppercase", maxWidth: 460 }}>
               {mayday.summaryHoursLabel}
             </div>
             <div style={{
