@@ -49,15 +49,17 @@ function decodePayload(hash) {
     while (b64.length % 4) b64 += "=";
     const json = decodeURIComponent(escape(atob(b64)));
     const obj = JSON.parse(json);
-    // Validate required fields
+    // Normalise country code: uppercase + DK → da, anything unknown → no
+    const rawC = typeof obj.c === "string" ? obj.c.toLowerCase() : "";
+    const country = rawC === "da" || rawC === "dk" ? "da" : "no";
+    // Validate required fields (country always falls back to "no", so not gated)
     const ok = obj
       && typeof obj.n === "string" && obj.n.length > 0 && obj.n.length < 80
-      && VALID_COUNTRIES.includes(obj.c)
       && Number.isFinite(obj.x) && obj.x >= 0 && obj.x < 100000;
     if (!ok) return null;
     return {
       firstName: obj.n,
-      country: obj.c,
+      country,
       notes: Math.round(obj.x),
     };
   } catch (_) {
