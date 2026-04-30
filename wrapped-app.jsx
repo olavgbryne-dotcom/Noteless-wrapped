@@ -416,9 +416,9 @@ function Carousel({ data, locale, ui, onComplete, onShare }) {
           position: "absolute", bottom: 48, left: "50%",
           transform: "translateX(-50%)",
           padding: "12px 22px", borderRadius: 99,
-          background: MD.ink, color: MD.paper,
+          background: MD.red, color: MD.paper,
           fontSize: 15, letterSpacing: "0.02em", fontWeight: 500,
-          boxShadow: "0 6px 18px rgba(0,0,0,0.22)",
+          boxShadow: "0 6px 18px rgba(194,52,43,0.32)",
           cursor: "pointer", zIndex: 6,
           display: "flex", alignItems: "center", gap: 12,
         }}>
@@ -466,7 +466,7 @@ function buildShareCaption({ locale, cardKey, data }) {
 
   if (locale === "da") {
     if (cardKey === "notes")
-      return `${titleDa}\n${fmt(data.notes, locale)} noter på et år. Tak til alle, der bærer journalen.\n\n${tag} · ${period}`;
+      return `${titleDa}\n${fmt(data.notes, locale)} noter på et år.\n\n${tag} · ${period}`;
     if (cardKey === "hours")
       return `${titleDa}\n${fmt(data.hours, locale)} timer frigjort til pasienterne — og til mig selv.\n\n${tag} · ${period}`;
     if (cardKey === "summary")
@@ -477,7 +477,7 @@ function buildShareCaption({ locale, cardKey, data }) {
 
   // Norwegian (default)
   if (cardKey === "notes")
-    return `${titleNo}\n${fmt(data.notes, locale)} notater på ett år. Takk til alle som bærer journalen.\n\n${tag} · ${period}`;
+    return `${titleNo}\n${fmt(data.notes, locale)} notater på ett år.\n\n${tag} · ${period}`;
   if (cardKey === "hours")
     return `${titleNo}\n${fmt(data.hours, locale)} timer frigjort til pasientene — og til meg selv.\n\n${tag} · ${period}`;
   if (cardKey === "summary")
