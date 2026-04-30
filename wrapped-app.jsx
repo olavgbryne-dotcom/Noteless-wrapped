@@ -91,9 +91,9 @@ const UI = {
     // Prompt
     promptEyebrow: "Før vi viser deg tallene",
     promptTitle: "Hvor mange minutter sparer du per notat?",
-    promptSub: "Vi bruker svaret til å regne ut hvor mange timer Noteless har gitt deg tilbake i år. Du kan endre det senere.",
+    promptSub: "Vi bruker svaret til å regne ut hvor mange timer Noteless har gitt deg tilbake det siste året.",
     promptHint: "Velg en — eller skriv ditt eget.",
-    promptCta: "Se min Wrapped",
+    promptCta: "Se mitt år",
     promptCustom: "Annet",
     promptUnit: "min",
     // End
@@ -124,9 +124,9 @@ const UI = {
     swipeHint: "Stryg →",
     promptEyebrow: "Før vi viser dig tallene",
     promptTitle: "Hvor mange minutter sparer du pr. notat?",
-    promptSub: "Vi bruger svaret til at regne ud, hvor mange timer Noteless har givet dig tilbage i år. Du kan ændre det senere.",
+    promptSub: "Vi bruger svaret til at regne ud, hvor mange timer Noteless har givet dig tilbage det seneste år.",
     promptHint: "Vælg en — eller skriv din egen.",
-    promptCta: "Se min Wrapped",
+    promptCta: "Se mit år",
     promptCustom: "Andet",
     promptUnit: "min",
     endTitle: "Tak for året, {name}.",
@@ -163,9 +163,16 @@ function BrokenLinkScreen({ ui }) {
       fontFamily: '"Untitled Sans", -apple-system, system-ui',
       padding: "60px 24px", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: 480, margin: "0 auto",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: MD.graphite, marginBottom: 32 }}>
-        <span style={{ width: 6, height: 6, background: MD.red, borderRadius: 99 }} />
-        NOTELESS · WRAPPED
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10, marginBottom: 32,
+      }}>
+        <img src="assets/wordmark-dark.svg" width={140} height={17.22} alt="Noteless" />
+        <span style={{
+          fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase",
+          color: MD.graphite, paddingLeft: 10, borderLeft: `1px solid ${MD.mute}`,
+        }}>
+          Wrapped
+        </span>
       </div>
       <div style={{ fontSize: 28, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 18, textWrap: "pretty" }}>
         {ui.brokenTitle}
@@ -188,7 +195,7 @@ function BrokenLinkScreen({ ui }) {
 // ─────────────────────────────────────────────────────────────
 function PromptScreen({ ui, value, onChange, onContinue }) {
   const t = ui;
-  const presets = [1, 3, 5];
+  const presets = [3, 5, 10];
   const [custom, setCustom] = React.useState(presets.includes(value) ? "" : String(value));
   const isPreset = presets.includes(value);
   return (
@@ -199,11 +206,9 @@ function PromptScreen({ ui, value, onChange, onContinue }) {
       maxWidth: 480, margin: "0 auto", boxSizing: "border-box",
     }}>
       <div style={{
-        display: "flex", alignItems: "center", gap: 6, fontSize: 10,
-        letterSpacing: "0.08em", textTransform: "uppercase", color: MD.graphite,
+        display: "flex", alignItems: "center", gap: 10,
       }}>
-        <span style={{ width: 6, height: 6, background: MD.red, borderRadius: 99 }} />
-        NOTELESS · WRAPPED
+        <img src="assets/wordmark-dark.svg" width={140} height={17.22} alt="Noteless" />
       </div>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", paddingTop: 24, paddingBottom: 24 }}>
@@ -393,12 +398,15 @@ function Carousel({ data, locale, ui, onComplete, onShare }) {
         </div>
       </div>
 
-      {/* Hint */}
+      {/* Share encouragement — replaces the counter, since the progress dots already show position */}
       <div style={{
         position: "absolute", bottom: 110, left: 0, right: 0, textAlign: "center",
-        color: MD.graphite, fontSize: 12, letterSpacing: "0.06em", textTransform: "uppercase",
+        color: MD.graphite, fontSize: 12, letterSpacing: "0.04em",
+        padding: "0 24px",
       }}>
-        {idx === 0 ? t.swipeHint : `${idx + 1} / ${total}`}
+        {locale === "da"
+          ? "Del med dit netværk, og tag #AftenerneTilbage"
+          : "Del med ditt nettverk, og tagg #KveldeneTilbake"}
       </div>
 
       {/* Share button — centered, prominent */}
