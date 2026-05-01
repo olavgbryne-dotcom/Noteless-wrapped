@@ -331,7 +331,8 @@ function Carousel({ data, locale, ui, onComplete, onShare }) {
     if (!el) return;
     const measure = () => {
       // Pad 8px each side, hard cap at 1080 (the native card size)
-      const w = Math.min(1080, Math.max(280, el.clientWidth - 16));
+      const cap = window.innerWidth > 520 ? 440 : 1080;
+      const w = Math.min(cap, Math.max(280, el.clientWidth - 16));
       setCardSize(w);
     };
     measure();
@@ -380,7 +381,8 @@ function Carousel({ data, locale, ui, onComplete, onShare }) {
       }}>
       {/* Progress dots — story-style */}
       <div style={{
-        position: "absolute", top: 60, left: 16, right: 16,
+        position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)",
+        width: "min(100% - 32px, 440px)",
         display: "flex", gap: 4, zIndex: 5,
       }}>
         {cards.map((_, i) => (
@@ -420,9 +422,9 @@ function Carousel({ data, locale, ui, onComplete, onShare }) {
 
       {/* Share encouragement — replaces the counter, since the progress dots already show position */}
       <div style={{
-        position: "absolute", bottom: 110, left: 0, right: 0, textAlign: "center",
+        position: "absolute", bottom: 110, left: "50%", transform: "translateX(-50%)",
+        width: "min(100% - 48px, 440px)", textAlign: "center",
         color: MD.graphite, fontSize: 12, letterSpacing: "0.04em",
-        padding: "0 24px",
       }}>
         {locale === "da"
           ? "Del med dit netværk, og tag #AftenerneTilbage"
